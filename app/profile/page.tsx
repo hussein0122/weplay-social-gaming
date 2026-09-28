@@ -1,0 +1,12 @@
+"use client";
+
+import { useEffect,useState } from "react";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+
+export default function ProfilePage(){
+ const supabase=createClient(); const [id,setId]=useState<string|null>(null); const [name,setName]=useState(""); const [username,setUsername]=useState(""); const [bio,setBio]=useState(""); const [level,setLevel]=useState(1); const [coins,setCoins]=useState(0); const [saved,setSaved]=useState("");
+ useEffect(()=>{(async()=>{const {data:{user}}=await supabase.auth.getUser();if(!user)return;setId(user.id);const {data}=await supabase.from("profiles").select("display_name,username,bio,level,coins").eq("id",user.id).single();if(data){setName(data.display_name);setUsername(data.username??"");setBio(data.bio);setLevel(data.level);setCoins(data.coins)}})()},[]);
+ async function save(){if(!id)return;const {error}=await supabase.from("profiles").update({display_name:name.trim(),username:username.trim()||null,bio:bio.trim(),updated_at:new Date().toISOString()}).eq("id",id);setSaved(error?.message??"تم حفظ البروفايل ✅")}
+ return <main className="min-h-screen p-5"><div className="mx-auto max-w-xl"><Link href="/lobby" className="text-sm text-white/50">← اللوبي</Link><div className="card mt-6"><div className="flex items-center gap-4"><div className="grid h-20 w-20 place-items-center rounded-full bg-violet-500/20 text-3xl">👤</div><div><h1 className="text-2xl font-black">{name||"لاعب"}</h1><p className="text-sm text-white/50">@{username||"player"} · LV.{level}</p></div></div><div className="mt-6 grid grid-cols-2 gap-3"><div className="rounded-2xl bg-white/5 p-4"><div className="text-xs text-white/40">المستوى</div><b className="text-xl">LV.{level}</b></div><div className="rounded-2xl bg-white/5 p-4"><div className="text-xs text-white/40">العملات</div><b className="text-xl">🪙 {coins}</b></div></div><div className="mt-6 space-y-4"><input className="input" value={name} onChange={e=>setName(e.target.value)} placeholder="اسم العرض"/><input className="input" value={username} onChange={e=>setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g,"").toLowerCase())} placeholder="Username"/><textarea className="input min-h-28 resize-none" value={bio} onChange={e=>setBio(e.target.value)} placeholder="نبذة عنك"/><button onClick={()=>void save()} className="w-full rounded-2xl bg-violet-600 py-3 font-black">حفظ التعديلات</button>{saved&&<p className="text-sm text-white/60">{saved}</p>}</div></div></div></main>
+}
