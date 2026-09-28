@@ -31,11 +31,10 @@ export default function GamePage(){
  useEffect(()=>{void load();const c=supabase.channel("game-"+params.id).on("postgres_changes",{event:"*",schema:"public",table:"game_players"},()=>void load()).on("postgres_changes",{event:"*",schema:"public",table:"game_sessions"},()=>void load()).subscribe();return()=>{void supabase.removeChannel(c)}},[params.id]);
 
  async function rollDice(){
-  if(!me||!session)return; const n=Math.floor(Math.random()*6)+1; setLastRoll(n);
-  let pos=Number(me.state?.position||0)+n;
-  if(room.game_type==="snakes"){if(snakes[pos])pos=snakes[pos];if(ladders[pos])pos=ladders[pos];pos=Math.min(pos,100)} else pos=Math.min(pos,52);
-  const {error}=await supabase.from("game_players").update({state:{...(me.state||{}),position:pos},score:pos}).eq("session_id",session.id).eq("user_id",me.user_id);
-  setMessage(error?error.message:"رميت "+n+" ووصلت للمربع "+pos+" 🎲");
+  if(!session)return;
+  const {data,error}=await supabase.rpc("roll_board_game",{p_session:session.id});
+  setLastRoll(data?.roll||0);
+  setMessage(error?error.message:("رميت "+data.roll+" ووصلت للمربع "+data.to+" 🎲"));
  }
  async function revealSpy(){
   if(!me||!session||me.state?.role)return;
