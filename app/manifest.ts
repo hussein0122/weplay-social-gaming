@@ -1,0 +1,1 @@
+import type {MetadataRoute} from "next"; export default function manifest():MetadataRoute.Manifest{return {name:"WePlay Social Gaming",short_name:"WePlay",description:"ألعاب اجتماعية وغرف صوتية",start_url:"/lobby",display:"standalone",background_color:"#070711",theme_color:"#7c3aed",lang:"ar",dir:"rtl"}}
