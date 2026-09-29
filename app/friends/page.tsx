@@ -20,12 +20,12 @@ export default function FriendsPage() {
     const {data:{user}}=await supabase.auth.getUser();
     if(!user) return;
     setMe(user.id);
-    const [{data:in},{data:out}] = await Promise.all([
+    const [{data:incomingData},{data:outgoingData}] = await Promise.all([
       supabase.from("friend_requests").select("id,sender_id,receiver_id,status,profiles!friend_requests_sender_id_fkey(id,username,display_name,level,status)").eq("receiver_id",user.id).eq("status","pending"),
       supabase.from("friend_requests").select("id,sender_id,receiver_id,status,profiles!friend_requests_receiver_id_fkey(id,username,display_name,level,status)").eq("sender_id",user.id).eq("status","accepted")
     ]);
-    setIncoming((in??[]) as unknown as Request[]);
-    setFriends((out??[]).map((x:any)=>x.profiles).filter(Boolean));
+    setIncoming((incomingData??[]) as unknown as Request[]);
+    setFriends((outgoingData??[]).map((x:any)=>x.profiles).filter(Boolean));
   }
   useEffect(()=>{void load()},[]);
 
